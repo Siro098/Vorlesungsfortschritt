@@ -146,15 +146,18 @@ def kopiere_ordner(quellordner, zielordner):
             print(f"Der Quellordner '{quellordner}' existiert nicht.")
             return
 
+        # Falls der Zielordner existiert, wird er gelöscht
         if os.path.exists(zielordner):
-            print("Existiert schon")
-            return
+            shutil.rmtree(zielordner)
+            print(f"Zielordner '{zielordner}' wurde gelöscht.")
 
-        shutil.copytree(quellordner, zielordner)
-        print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert.")
+        # Kopiere den Quellordner, ignoriere ".GitHub"
+        shutil.copytree(quellordner, zielordner, ignore=shutil.ignore_patterns(".github"))
+        print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert ('.GitHub' ignoriert).")
 
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
+
 
 def copyFolder():
     array = []
@@ -166,11 +169,9 @@ def copyFolder():
         if "pfad_falls_nicht_in_dokumente" in array[i]:
             #print(array[i].split("=")[-1].strip() + "/Skins")
             #print(os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins"))
-            kopiere_ordner(os.path.join(os.getcwd()), array[i].split("=")[-1].strip() + "\\Skins")
+            kopiere_ordner(os.path.join(os.getcwd()), array[i].split("=")[-1].strip() + "\\Skins\\Vorlesungsfortschritt")
             return
-    kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins"))
-
-
+    kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins", "Vorlesungsfortschritt"))
 
 if os.path.exists(dateiname):
     check_ueberschreiben()
