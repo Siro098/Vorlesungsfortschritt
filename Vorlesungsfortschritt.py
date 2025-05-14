@@ -22,6 +22,9 @@ OUTPUT_FILE2 = r".\txtfiles\Bar.txt"
 #WALLPAPER = True
 # OUTPUT_FILE3 = "C:/Program Files (x86)/Steam/steamapps/workshop/content/431960/1322008613/test/percentage.txt"
 
+# Speicherort für Wallpaper Engine (relativer Pfad gönnt nicht)
+WALLPAPER = True
+OUTPUT_FILE3 = "C:/Program Files (x86)/Steam/steamapps/workshop/content/431960/1322008613/test/percentage.txt"
 
 def update_ics_file():
     """Lädt die aktuelle iCal-Datei herunter."""
@@ -41,7 +44,6 @@ def update_ics_file():
     except Exception as e:
         print(f"Fehler beim Aktualisieren der iCal-Datei: {e}")
         sys.exit(1)
-
 
 def write_to_file(vorlesung, percentage, timer_if_upcoming_subject):
     """Schreibt die Vorlesungsdaten in eine Datei, die Rainmeter nutzen kann."""
@@ -88,9 +90,7 @@ def main():
             if component.name == "VEVENT":
                 start = component.decoded("dtstart")
                 end = component.decoded("dtend")
-                subject = component.decoded("SUMMARY").decode("utf-8") if isinstance(component.decoded("SUMMARY"),
-                                                                                     bytes) else str(
-                    component.decoded("SUMMARY"))
+                subject = component.decoded("SUMMARY").decode("utf-8") if isinstance(component.decoded("SUMMARY"), bytes) else str(component.decoded("SUMMARY"))
                 if isinstance(start, datetime) and isinstance(end, datetime):
                     if start <= now <= end:
                         total_duration = (end - start).total_seconds()
@@ -98,12 +98,11 @@ def main():
                         percentage = (elapsed_time / total_duration) * 100
                         write_to_file(subject, percentage, "")
                         return  # Vorlesung gefunden, kein weiteres Durchsuchen nötig
-
-                    elif now <= start and now.date() == start.date():  # Nächste Vorlesung an selben Tag
-                        # print(now.date())
-                        # print(start.date())
+                    elif now <= start and now.date() == start.date(): # Nächste Vorlesung an selben Tag
+                        #print(now.date())
+                        #print(start.date())
                         time_to_subject = (start - now).total_seconds()
-                        hours = str(int(time_to_subject // 3600)).zfill(2)
+                        hours =   str(int(time_to_subject // 3600)).zfill(2)
                         minutes = str(int((time_to_subject % 3600) // 60)).zfill(2)
                         seconds = str(int(time_to_subject % 60)).zfill(2)
 
@@ -118,7 +117,6 @@ def main():
     except Exception as e:
         print(f"Fehler beim Verarbeiten der iCal-Datei: {e}")
         write_to_file("Fehler", 0, "")
-
 
 def fetchSetupFile(typ):
     global zeile
@@ -146,7 +144,6 @@ def fetchSetupFile(typ):
 
 
     return None
-
 
 if __name__ == "__main__":
 
