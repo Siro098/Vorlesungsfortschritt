@@ -2,8 +2,10 @@ import tkinter as tk
 import configparser
 import os
 from tkinter import filedialog
+import shutil
 
-dateiname = "config.ini"
+
+dateiname = "config.txt"
 
 
 def speichern(event=None):
@@ -23,13 +25,13 @@ def speichern(event=None):
         config["Eingaben"]["pfad_falls_nicht_in_Dokumente"] = ordner_pfad
 
     if datei_pfad:
-        config["Eingaben"]["Wallpaper_Datei_Pfad"] = datei_pfad  # Speichert den ausgewählten Dateipfad
+        config["Eingaben"]["Wallpaper_Datei_Pfad"] = datei_pfad
 
     with open(dateiname, "w") as configfile:
         config.write(configfile)
 
+    copyFolder()  # Funktion zum Kopieren des Ordners nach dem Speichern aufrufen
     root.destroy()
-
 
 def check_ueberschreiben():
     config = configparser.ConfigParser()
@@ -94,8 +96,8 @@ def erstellen_fenster():
 
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    fenster_width = int(screen_width * 0.35)
-    fenster_height = int(screen_height * 0.35)
+    fenster_width = int(screen_width * 0.32)
+    fenster_height = int(screen_height * 0.4)
     root.geometry(f"{fenster_width}x{fenster_height}")
 
     global button, ordner_pfad, datei_pfad
@@ -135,10 +137,46 @@ def erstellen_fenster():
     btn_speichern = tk.Button(root, text="Speichern", command=speichern)
     btn_speichern.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
 
+
     root.mainloop()
+
+def kopiere_ordner(quellordner, zielordner):
+    try:
+        if not os.path.exists(quellordner):
+            print(f"Der Quellordner '{quellordner}' existiert nicht.")
+            return
+
+        if os.path.exists(zielordner):
+            print("Existiert schon")
+            return
+
+        shutil.copytree(quellordner, zielordner)
+        print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert.")
+
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+def copyFolder():
+    array = []
+    with open(r".\config.txt", 'r', encoding='utf-8') as datei:
+        for zeile in datei:
+            array.append(zeile.strip())
+
+    for i in range(len(array)):
+        if "pfad_falls_nicht_in_dokumente" in array[i]:
+            #print(array[i].split("=")[-1].strip() + "/Skins")
+            #print(os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins"))
+            kopiere_ordner(os.path.join(os.getcwd()), array[i].split("=")[-1].strip() + "\\Skins")
+            return
+    kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins"))
+
 
 
 if os.path.exists(dateiname):
     check_ueberschreiben()
 else:
     erstellen_fenster()
+
+
+
+

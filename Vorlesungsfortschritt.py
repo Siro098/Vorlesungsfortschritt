@@ -2,21 +2,21 @@
 #Git: Siro098 & adiiii789
 #Python Skript for Vorlesungsfortschritt 1.0
 
-from icalendar import Calendar 
+from icalendar import Calendar
 from datetime import datetime, timedelta
 import os
 import requests
 import sys
 
 # === KONFIGURATION ===
-URL = "https://dhbw.app/ical/FN-TIT24"  # Download-Link für die iCal-Datei
-DEST_FOLDER = r".\ical" # Speicherort für die iCal-Datei
-ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1])+".ics")  # Pfad zur gespeicherten iCal-Datei
+#URL = "https://dhbw.app/ical/FN-TIT24"  # Download-Link für die iCal-Datei
+cal = Calendar()
+DEST_FOLDER = r".\ical"  # Speicherort für die iCal-Datei
 
 # Neuer Speicherort für Rainmeter (kein OneDrive!)
-OUTPUT_FILE = r".\txtfiles\Vorlesung.txt"  
-OUTPUT_FILE1 = r".\txtfiles\Zahl.txt"  
-OUTPUT_FILE2 = r".\txtfiles\Bar.txt"  
+OUTPUT_FILE = r".\txtfiles\Vorlesung.txt"
+OUTPUT_FILE1 = r".\txtfiles\Zahl.txt"
+OUTPUT_FILE2 = r".\txtfiles\Bar.txt"
 
 
 def update_ics_file():
@@ -38,12 +38,13 @@ def update_ics_file():
         print(f"Fehler beim Aktualisieren der iCal-Datei: {e}")
         sys.exit(1)
 
+
 def write_to_file(vorlesung, percentage):
     """Schreibt die Vorlesungsdaten in eine Datei, die Rainmeter nutzen kann."""
     progress_bar_length = 30  # Länge des Fortschrittsbalkens
     filled_blocks = int(round(progress_bar_length * percentage / 100))
     progress_bar = "#" * filled_blocks + "-" * (progress_bar_length - filled_blocks)
-    
+
     try:
         with open(OUTPUT_FILE, "w") as f:
             f.write(f"{vorlesung}\n")  # Vorlesungsname
@@ -54,11 +55,10 @@ def write_to_file(vorlesung, percentage):
     except Exception as e:
         print(f"Fehler beim Schreiben der Datei: {e}")
 
+
 def main():
-     
     print("Starte Berechnung...")  # Debug-Ausgabe
 
-    
     """Berechnet den aktuellen Fortschritt der laufenden Vorlesung."""
     now = datetime.now().astimezone()  # Konvertiert 'now' in ein offset-aware datetime
     try:
@@ -69,7 +69,9 @@ def main():
             if component.name == "VEVENT":
                 start = component.decoded("dtstart")
                 end = component.decoded("dtend")
-                subject = component.decoded("SUMMARY").decode("utf-8") if isinstance(component.decoded("SUMMARY"), bytes) else str(component.decoded("SUMMARY"))
+                subject = component.decoded("SUMMARY").decode("utf-8") if isinstance(component.decoded("SUMMARY"),
+                                                                                     bytes) else str(
+                    component.decoded("SUMMARY"))
 
                 if isinstance(start, datetime) and isinstance(end, datetime):
                     if start <= now <= end:
@@ -86,6 +88,40 @@ def main():
         print(f"Fehler beim Verarbeiten der iCal-Datei: {e}")
         write_to_file("Fehler", 0)
 
+def fetchSetupFile(typ):
+    global zeile
+    array = []
+    try:
+        with open(r".\config.txt", 'r', encoding='utf-8') as datei:
+            for zeile in datei:
+                array.append(zeile.strip())
+
+    except FileNotFoundError:
+        print("Config nicht gefunden")
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+    for i in range(len(array)):
+        if typ in array[i]:
+            if "kurs" in typ:
+                return array[i].split("=")[-1].strip()
+            elif "wallpaper_aktiv" in typ:
+                pass
+            elif "pfad_falls_nicht_in_dokumente" in typ:
+                pass
+            elif "wallpaper_datei_pfad" in typ:
+                pass
+
+
+    return None
+
+
 if __name__ == "__main__":
-    update_ics_file()
-    main()
+    if open(r".\config.txt", 'r', encoding='utf-8').read() != "":
+        URL = "https://dhbw.app/ical/" + fetchSetupFile("kurs") + ".ics"
+        ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1]))  # Pfad zur gespeicherten iCal-Datei
+
+        update_ics_file()
+        main()
+    else:
+        print("Setup nicht ausgeführt (-> config leer)")
