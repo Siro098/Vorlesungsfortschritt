@@ -3,18 +3,15 @@ import configparser
 import os
 from tkinter import filedialog
 import shutil
-
-
-dateiname = "config.txt"
 import sys
 import subprocess
 
-
+dateiname = "config.txt"
 def installiere_module():
     try:
         python_path = sys.executable
 
-        for modul in ["requests", "icalendar", "pandas"]:
+        for modul in ["requests", "icalendar"]:
             print(f"Installiere {modul}...")
             subprocess.run([python_path, "-m", "pip", "install", modul], check=True)
 
