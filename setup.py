@@ -6,6 +6,45 @@ import shutil
 
 
 dateiname = "config.txt"
+import sys
+import subprocess
+
+
+def installiere_module():
+    try:
+        python_path = sys.executable
+
+        for modul in ["requests", "icalendar", "pandas"]:
+            print(f"Installiere {modul}...")
+            subprocess.run([python_path, "-m", "pip", "install", modul], check=True)
+
+        print("Alle Module wurden erfolgreich installiert.")
+
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+
+def editIni():
+    dateipfad = r".\Vorlesungsfortschritt.ini"
+    try:
+        python_path = os.path.abspath(os.sys.executable)  # Ermittelt den aktuellen Python-Pfad
+
+        with open(dateipfad, "r", encoding="utf-8") as datei:
+            inhalt = datei.read()
+
+        # Ersetzt "%SETUP%" durch den Python-Pfad
+        inhalt = inhalt.replace("%SETUP%", python_path)
+
+        with open(dateipfad, "w", encoding="utf-8") as datei:
+            datei.write(inhalt)
+
+        print(f"'%SETUP%' wurde in '{dateipfad}' erfolgreich durch '{python_path}' ersetzt.")
+
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+
+
 
 
 def speichern(event=None):
@@ -30,6 +69,7 @@ def speichern(event=None):
     with open(dateiname, "w") as configfile:
         config.write(configfile)
 
+    editIni()
     copyFolder()  # Funktion zum Kopieren des Ordners nach dem Speichern aufrufen
     root.destroy()
 
@@ -152,7 +192,7 @@ def kopiere_ordner(quellordner, zielordner):
             print(f"Zielordner '{zielordner}' wurde gelöscht.")
 
         # Kopiere den Quellordner, ignoriere ".GitHub"
-        shutil.copytree(quellordner, zielordner, ignore=shutil.ignore_patterns(".github"))
+        shutil.copytree(quellordner, zielordner, ignore=shutil.ignore_patterns(".github",".git"))
         print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert ('.GitHub' ignoriert).")
 
     except Exception as e:
@@ -173,6 +213,7 @@ def copyFolder():
             return
     kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins", "Vorlesungsfortschritt"))
 
+installiere_module()
 if os.path.exists(dateiname):
     check_ueberschreiben()
 else:
