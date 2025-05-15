@@ -8,13 +8,6 @@ import subprocess
 
 dateiname = "config.txt"
 
-# Globale Variablen initialisieren
-ordner_pfad = ""
-datei_pfad = ""
-btn_datei_waehlen = None
-label_datei_pfad = None
-label_ausgewaehlter_ordner = None
-
 def installiere_module():
     try:
         python_path = sys.executable
@@ -46,9 +39,7 @@ def editIni():
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
-def speichern(event=None):
-    global ordner_pfad, datei_pfad
-
+def speichern(root, eintrag, button, ordner_pfad, datei_pfad):
     config = configparser.ConfigParser()
 
     if os.path.exists(dateiname):
@@ -70,42 +61,10 @@ def speichern(event=None):
         config.write(configfile)
 
     editIni()
-    copyFolder()
+    copyFolder(ordner_pfad)
     root.destroy()
 
-def check_ueberschreiben():
-    config = configparser.ConfigParser()
-    config.read(dateiname)
-
-    if config.sections():
-        def ueberschreiben():
-            with open(dateiname, "w") as configfile:
-                pass
-            dialog.destroy()
-            erstellen_fenster()
-
-        def abbrechen():
-            dialog.destroy()
-            root.quit()
-
-        dialog = tk.Tk()
-        dialog.title("Konfiguration überschreiben?")
-        label = tk.Label(dialog, text="Die Datei enthält bereits Daten. Überschreiben?")
-        label.pack(pady=10)
-
-        btn_yes = tk.Button(dialog, text="Ja", command=ueberschreiben)
-        btn_yes.pack(side=tk.LEFT, padx=10, pady=10)
-
-        btn_no = tk.Button(dialog, text="Nein", command=abbrechen)
-        btn_no.pack(side=tk.RIGHT, padx=10, pady=10)
-
-        dialog.mainloop()
-    else:
-        erstellen_fenster()
-
-def toggle_button():
-    global btn_datei_waehlen, label_datei_pfad
-
+def toggle_button(button, btn_datei_waehlen, label_datei_pfad):
     button["text"] = "Wallpaper An" if button["text"] == "Wallpaper Aus" else "Wallpaper Aus"
 
     if button["text"] == "Wallpaper An":
@@ -115,21 +74,19 @@ def toggle_button():
         btn_datei_waehlen.pack_forget()
         label_datei_pfad.pack_forget()
 
-def datei_waehlen():
-    global datei_pfad, label_datei_pfad
+def datei_waehlen(label_datei_pfad):
     datei_pfad = filedialog.askopenfilename(title="Wähle eine Textdatei", filetypes=[("Textdateien", "*.txt")])
     if datei_pfad:
         label_datei_pfad.config(text=f"Ausgewählt: {datei_pfad}")
+    return datei_pfad
 
-def ordner_waehlen():
-    global ordner_pfad, label_ausgewaehlter_ordner
+def ordner_waehlen(label_ausgewaehlter_ordner):
     ordner_pfad = filedialog.askdirectory(title="Wähle einen Ordner")
     if ordner_pfad:
         label_ausgewaehlter_ordner.config(text=f"Ausgewählt: {ordner_pfad}")
+    return ordner_pfad
 
 def erstellen_fenster():
-    global root, label_ausgewaehlter_ordner, btn_datei_waehlen, label_datei_pfad, eintrag, ordner_pfad, datei_pfad, button
-
     root = tk.Tk()
     root.title("Konfiguration speichern")
 
@@ -149,7 +106,7 @@ def erstellen_fenster():
         label_info = tk.Label(root, text="Rainmeter-Ordner nicht gefunden. Bitte einen Ordner auswählen:")
         label_info.pack()
 
-        btn_ordner_waehlen = tk.Button(root, text="Ordner auswählen", command=ordner_waehlen)
+        btn_ordner_waehlen = tk.Button(root, text="Ordner auswählen", command=lambda: ordner_waehlen(label_ausgewaehlter_ordner))
         btn_ordner_waehlen.pack(pady=5)
 
         label_ausgewaehlter_ordner = tk.Label(root, text="Kein Ordner ausgewählt")
@@ -159,15 +116,14 @@ def erstellen_fenster():
     label.pack()
     eintrag = tk.Entry(root)
     eintrag.pack(pady=5)
-    eintrag.bind("<Return>", speichern)
 
-    button = tk.Button(root, text="Wallpaper Aus", command=toggle_button)
+    button = tk.Button(root, text="Wallpaper Aus", command=lambda: toggle_button(button, btn_datei_waehlen, label_datei_pfad))
     button.pack(pady=5)
 
-    btn_datei_waehlen = tk.Button(root, text="Textdatei auswählen", command=datei_waehlen)
+    btn_datei_waehlen = tk.Button(root, text="Textdatei auswählen", command=lambda: datei_waehlen(label_datei_pfad))
     label_datei_pfad = tk.Label(root, text="Keine Datei ausgewählt")
 
-    btn_speichern = tk.Button(root, text="Speichern", command=speichern)
+    btn_speichern = tk.Button(root, text="Speichern", command=lambda: speichern(root, eintrag, button, ordner_pfad, datei_pfad))
     btn_speichern.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
 
     root.mainloop()
@@ -188,7 +144,7 @@ def kopiere_ordner(quellordner, zielordner):
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
-def copyFolder():
+def copyFolder(ordner_pfad):
     array = []
     with open(dateiname, 'r', encoding='utf-8') as datei:
         for zeile in datei:
@@ -202,6 +158,6 @@ def copyFolder():
 
 installiere_module()
 if os.path.exists(dateiname):
-    check_ueberschreiben()
+    erstellen_fenster()
 else:
     erstellen_fenster()
