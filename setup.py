@@ -22,7 +22,7 @@ def installiere_module():
         print(f"Ein Fehler ist aufgetreten: {e}")
 
 def editIni():
-    dateipfad = r".\Vorlesungsfortschritt.ini"
+    dateipfad = os.path.abspath(__file__).replace("setup.py","Vorlesungsfortschritt.ini")
     try:
         python_path = os.path.abspath(os.sys.executable)
 
@@ -152,9 +152,9 @@ def copyFolder(ordner_pfad):
 
     for i in range(len(array)):
         if "pfad_falls_nicht_in_dokumente" in array[i]:
-            kopiere_ordner(os.path.join(os.getcwd()), array[i].split("=")[-1].strip() + "\\Skins\\Vorlesungsfortschritt")
+            kopiere_ordner(os.path.join(os.path.abspath(__file__).replace("setup.py","")), array[i].split("=")[-1].strip() + r"\Skins\Vorlesungsfortschritt")
             return
-    kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins", "Vorlesungsfortschritt"))
+    kopiere_ordner(os.path.join(os.path.abspath(__file__).replace("setup.py","")), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins", "Vorlesungsfortschritt"))
 
 installiere_module()
 if os.path.exists(dateiname):
