@@ -10,13 +10,13 @@ import sys
 
 # === KONFIGURATION ===
 #URL = "https://dhbw.app/ical/STG-TINF24IN"  # Download-Link für die iCal-Datei
-DEST_FOLDER = r".\ical"  # Speicherort für die iCal-Datei
+DEST_FOLDER = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py","ical")  # Speicherort für die iCal-Datei
 #ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1]) + ".ics")  # Pfad zur gespeicherten iCal-Datei
 
 # Neuer Speicherort für Rainmeter (kein OneDrive!)
-OUTPUT_FILE = r".\txtfiles\Vorlesung.txt"
-OUTPUT_FILE1 = r".\txtfiles\Zahl.txt"
-OUTPUT_FILE2 = r".\txtfiles\Bar.txt"
+OUTPUT_FILE = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Vorlesung.txt")
+OUTPUT_FILE1 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Zahl.txt")
+OUTPUT_FILE2 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Bar.txt")
 
 # Speicherort für Wallpaper Engine (relativer Pfad gönnt nicht)
 #WALLPAPER = True
@@ -124,7 +124,7 @@ def fetchSetupFile(typ):
 
     array = []
     try:
-        with open(r".\config.txt", 'r', encoding='utf-8') as datei:
+        with open(config, 'r', encoding='utf-8') as datei:
             for zeile in datei:
                 array.append(zeile.strip())
 
@@ -149,16 +149,16 @@ def fetchSetupFile(typ):
 
 
 if __name__ == "__main__":
-
-    if open(r".\config.txt", 'r', encoding='utf-8').read() != "":
+    config = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", "config.txt")
+    if open(config, 'r', encoding='utf-8').read() != "":
         URL = "https://dhbw.app/ical/" + fetchSetupFile("kurs") + ".ics"
         ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1]))  # Pfad zur gespeicherten iCal-Datei
 
-        if "Wallpaper An" in open(r".\config.txt", 'r', encoding='utf-8').read():
+        if "Wallpaper An" in open(config, 'r', encoding='utf-8').read():
             WALLPAPER = True
             array = []
             try:
-                with open(r".\config.txt", 'r', encoding='utf-8') as datei:
+                with open(config, 'r', encoding='utf-8') as datei:
                     for zeile in datei:
                         array.append(zeile.strip())
 
