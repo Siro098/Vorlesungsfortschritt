@@ -7,6 +7,7 @@ import sys
 import subprocess
 
 dateiname = "config.txt"
+
 def installiere_module():
     try:
         python_path = sys.executable
@@ -20,16 +21,14 @@ def installiere_module():
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
-
 def editIni():
     dateipfad = r".\Vorlesungsfortschritt.ini"
     try:
-        python_path = os.path.abspath(os.sys.executable)  # Ermittelt den aktuellen Python-Pfad
+        python_path = os.path.abspath(os.sys.executable)
 
         with open(dateipfad, "r", encoding="utf-8") as datei:
             inhalt = datei.read()
 
-        # Ersetzt "%SETUP%" durch den Python-Pfad
         inhalt = inhalt.replace("%SETUP%", python_path)
 
         with open(dateipfad, "w", encoding="utf-8") as datei:
@@ -40,12 +39,9 @@ def editIni():
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
-
-
-
-
 def speichern(event=None):
-    global root
+    global ordner_pfad, datei_pfad
+
     config = configparser.ConfigParser()
 
     if os.path.exists(dateiname):
@@ -67,7 +63,7 @@ def speichern(event=None):
         config.write(configfile)
 
     editIni()
-    copyFolder()  # Funktion zum Kopieren des Ordners nach dem Speichern aufrufen
+    copyFolder()
     root.destroy()
 
 def check_ueberschreiben():
@@ -100,8 +96,9 @@ def check_ueberschreiben():
     else:
         erstellen_fenster()
 
-
 def toggle_button():
+    global btn_datei_waehlen, label_datei_pfad
+
     button["text"] = "Wallpaper An" if button["text"] == "Wallpaper Aus" else "Wallpaper Aus"
 
     if button["text"] == "Wallpaper An":
@@ -111,20 +108,17 @@ def toggle_button():
         btn_datei_waehlen.pack_forget()
         label_datei_pfad.pack_forget()
 
-
 def datei_waehlen():
     global datei_pfad, label_datei_pfad
     datei_pfad = filedialog.askopenfilename(title="Wähle eine Textdatei", filetypes=[("Textdateien", "*.txt")])
     if datei_pfad:
         label_datei_pfad.config(text=f"Ausgewählt: {datei_pfad}")
 
-
 def ordner_waehlen():
     global ordner_pfad, label_ausgewaehlter_ordner
     ordner_pfad = filedialog.askdirectory(title="Wähle einen Ordner")
     if ordner_pfad:
         label_ausgewaehlter_ordner.config(text=f"Ausgewählt: {ordner_pfad}")
-
 
 def erstellen_fenster():
     global root, label_ausgewaehlter_ordner, btn_datei_waehlen, label_datei_pfad, eintrag
@@ -154,26 +148,20 @@ def erstellen_fenster():
         label_ausgewaehlter_ordner = tk.Label(root, text="Kein Ordner ausgewählt")
         label_ausgewaehlter_ordner.pack()
 
-    # Nur ein Textfeld bleibt erhalten
     label = tk.Label(root, text="Kurs:\neg. STG-TINFXXIN")
     label.pack()
     eintrag = tk.Entry(root)
     eintrag.pack(pady=5)
     eintrag.bind("<Return>", speichern)
 
-    label_button = tk.Label(root, text="\n\n\nWenn aktiviert, schreibt generierte Daten in .txt Datei,\n welche weitere Programme nutzen können (e.g. Wallpaper Engine)")
-    label_button.pack()
     button = tk.Button(root, text="Wallpaper Aus", command=toggle_button)
     button.pack(pady=5)
 
-    # Button für Datei-Auswahl (wird erst sichtbar, wenn Wallpaper aktiviert wird)
     btn_datei_waehlen = tk.Button(root, text="Textdatei auswählen", command=datei_waehlen)
     label_datei_pfad = tk.Label(root, text="Keine Datei ausgewählt")
 
-    # Speichern-Button **ganz unten** im Fenster platzieren
     btn_speichern = tk.Button(root, text="Speichern", command=speichern)
     btn_speichern.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
-
 
     root.mainloop()
 
@@ -183,18 +171,15 @@ def kopiere_ordner(quellordner, zielordner):
             print(f"Der Quellordner '{quellordner}' existiert nicht.")
             return
 
-        # Falls der Zielordner existiert, wird er gelöscht
         if os.path.exists(zielordner):
             shutil.rmtree(zielordner)
             print(f"Zielordner '{zielordner}' wurde gelöscht.")
 
-        # Kopiere den Quellordner, ignoriere ".GitHub"
         shutil.copytree(quellordner, zielordner, ignore=shutil.ignore_patterns(".github",".git"))
         print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert ('.GitHub' ignoriert).")
 
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
-
 
 def copyFolder():
     array = []
@@ -204,8 +189,6 @@ def copyFolder():
 
     for i in range(len(array)):
         if "pfad_falls_nicht_in_dokumente" in array[i]:
-            #print(array[i].split("=")[-1].strip() + "/Skins")
-            #print(os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins"))
             kopiere_ordner(os.path.join(os.getcwd()), array[i].split("=")[-1].strip() + "\\Skins\\Vorlesungsfortschritt")
             return
     kopiere_ordner(os.path.join(os.getcwd()), os.path.join(os.path.expanduser("~"), "Documents", "Rainmeter", "Skins", "Vorlesungsfortschritt"))
@@ -215,7 +198,3 @@ if os.path.exists(dateiname):
     check_ueberschreiben()
 else:
     erstellen_fenster()
-
-
-
-
