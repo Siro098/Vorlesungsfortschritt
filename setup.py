@@ -8,6 +8,13 @@ import subprocess
 
 dateiname = "config.txt"
 
+# Globale Variablen initialisieren
+ordner_pfad = ""
+datei_pfad = ""
+btn_datei_waehlen = None
+label_datei_pfad = None
+label_ausgewaehlter_ordner = None
+
 def installiere_module():
     try:
         python_path = sys.executable
@@ -121,8 +128,7 @@ def ordner_waehlen():
         label_ausgewaehlter_ordner.config(text=f"Ausgewählt: {ordner_pfad}")
 
 def erstellen_fenster():
-    global root, label_ausgewaehlter_ordner, btn_datei_waehlen, label_datei_pfad, eintrag
-    global ordner_pfad, datei_pfad, button
+    global root, label_ausgewaehlter_ordner, btn_datei_waehlen, label_datei_pfad, eintrag, ordner_pfad, datei_pfad, button
 
     root = tk.Tk()
     root.title("Konfiguration speichern")
