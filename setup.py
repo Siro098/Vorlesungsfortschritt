@@ -122,6 +122,8 @@ def ordner_waehlen():
 
 def erstellen_fenster():
     global root, label_ausgewaehlter_ordner, btn_datei_waehlen, label_datei_pfad, eintrag
+    global ordner_pfad, datei_pfad, button
+
     root = tk.Tk()
     root.title("Konfiguration speichern")
 
@@ -131,7 +133,6 @@ def erstellen_fenster():
     fenster_height = int(screen_height * 0.4)
     root.geometry(f"{fenster_width}x{fenster_height}")
 
-    global button, ordner_pfad, datei_pfad
     ordner_pfad = ""
     datei_pfad = ""
 
@@ -176,14 +177,14 @@ def kopiere_ordner(quellordner, zielordner):
             print(f"Zielordner '{zielordner}' wurde gelöscht.")
 
         shutil.copytree(quellordner, zielordner, ignore=shutil.ignore_patterns(".github",".git"))
-        print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert ('.GitHub' ignoriert).")
+        print(f"Ordner '{quellordner}' wurde erfolgreich nach '{zielordner}' kopiert.")
 
     except Exception as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
 def copyFolder():
     array = []
-    with open(r".\config.txt", 'r', encoding='utf-8') as datei:
+    with open(dateiname, 'r', encoding='utf-8') as datei:
         for zeile in datei:
             array.append(zeile.strip())
 
