@@ -1,0 +1,4 @@
+[Eingaben]
+kurs = STG-TINF24IN
+wallpaper_aktiv = Wallpaper Aus
+
