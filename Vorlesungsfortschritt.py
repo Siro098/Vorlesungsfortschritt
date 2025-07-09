@@ -24,8 +24,35 @@ OUTPUT_FILE2 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"tx
 
 
 def update_ics_file():
-    """Lädt die aktuelle iCal-Datei herunter."""
-    print("Lade ICS-Datei herunter...")  # Debug-Output
+    today = datetime.today().date()
+    updated_lines = []
+    found_datum = False
+    outdated = False
+
+    with open(config, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    for line in lines:
+        if line.strip().startswith("datum="):
+            found_datum = True
+            try:
+                saved_date = datetime.strptime(line.strip().split("=", 1)[1], "%Y-%m-%d").date()
+                if saved_date < today:
+                    updated_lines.append(f"datum={today}\n")
+                    outdated = True
+                else:
+                    print("ICS-Datei wurde heute bereits aktualisiert.")
+                    return
+            except Exception as e:
+                updated_lines.append(f"datum={today}\n")
+                outdated = True
+        else:
+            updated_lines.append(line)
+
+    if not found_datum:
+        updated_lines.append(f"datum={today}\n")
+
+    print("Lade ICS-Datei herunter...")
     try:
         response = requests.get(URL, stream=True)
         if response.ok:
@@ -39,8 +66,11 @@ def update_ics_file():
             print(f"Fehler beim Download: {response.status_code}")
             sys.exit(1)
     except Exception as e:
-        print(f"Fehler beim Aktualisieren der iCal-Datei: {e}")
+        print(f"Fehler beim Download: {e}")
         sys.exit(1)
+
+    with open(config, 'w', encoding='utf-8') as f:
+        f.writelines(updated_lines)
 
 
 def write_to_file(vorlesung, percentage, timer_if_upcoming_subject):
