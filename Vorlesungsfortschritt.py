@@ -29,6 +29,7 @@ def update_ics_file():
     found_datum = False
     outdated = False
 
+    # Datei einlesen
     with open(config, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
@@ -43,7 +44,7 @@ def update_ics_file():
                 else:
                     print("ICS-Datei wurde heute bereits aktualisiert.")
                     return
-            except Exception as e:
+            except Exception:
                 updated_lines.append(f"datum={today}\n")
                 outdated = True
         else:
@@ -52,9 +53,10 @@ def update_ics_file():
     if not found_datum:
         updated_lines.append(f"datum={today}\n")
 
+    # ICS-Datei herunterladen
     print("Lade ICS-Datei herunter...")
     try:
-        response = requests.get(URL, stream=True)
+        response = requests.get(URL, stream=True, timeout=3)  # Timeout in Sekunden
         if response.ok:
             with open(ICS_FILE, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=1024 * 8):
@@ -64,11 +66,15 @@ def update_ics_file():
                         os.fsync(f.fileno())
         else:
             print(f"Fehler beim Download: {response.status_code}")
-            sys.exit(1)
+            return  # Download fehlgeschlagen → kein exit
+    except requests.exceptions.Timeout:
+        print("Download abgebrochen: Zeitüberschreitung.")
+        return
     except Exception as e:
         print(f"Fehler beim Download: {e}")
-        sys.exit(1)
+        return
 
+    # Datei zurückschreiben mit neuem Datum
     with open(config, 'w', encoding='utf-8') as f:
         f.writelines(updated_lines)
 
