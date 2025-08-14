@@ -29,3 +29,7 @@ Wenn das `Setup` das Rainmeter Verzeichnis nicht in `Dokumente` vorfindet, kommt
 Wenn in der `config` bereits etwas steht, fragt das Setup ob man dies überschreiben will. Bei betätigen von Ja wird die `config` zurückgesetzt. 
 
 Getestet unter Python 3.8, 3.12, 3.13 (VM Win11)
+
+## Its not a Bug its a feature(Known Problems)
+-Sollten zwei Termine zum selben Zeitpunkt stattfinden wechselt das Skript regelmäßig zwischen denn beiden Terminen(interresanterweiße ziemlich rhytmisch)
+-Der Fortschrittsbalken kann Artefakte bilden bei manchen Schriftgrößen, ebenfalls wird er immer länger(in Untersuchung)
