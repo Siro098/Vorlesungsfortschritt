@@ -1,3 +1,6 @@
+The Tool is completly free to use if you want to buy us a coffee we´d really appreciate it because ☕ = Happiness :)
+https://buymeacoffee.com/vorlesungsfortschritt
+
 # Description
 `Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)`
 
