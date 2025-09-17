@@ -10,7 +10,7 @@ https://buymeacoffee.com/vorlesungsfortschritt
 # Description
 `Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)`
 
-Ein Skript zum Anzeigen des aktuellen Fortschrittes in einer DHBW Vorlesung in Prozent.
+Ein Skript zum Anzeigen des aktuellen Fortschrittes in einer DHBW Vorlesung oder eines Kalendertermins in Prozent.
 
 Hierfür wurde Python als Backend und Rainmeter als Frontend gewählt.
 
@@ -48,7 +48,7 @@ Description
 
 Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)
 
-A script to display the current progress of a DHBW lecture in percent.
+A script to display the current progress of a DHBW lecture or calender event in percent.
 
 For this, Python is used as the backend and Rainmeter as the frontend.
 
