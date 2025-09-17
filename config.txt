@@ -1,0 +1,5 @@
+[ICS]
+urls = https://outlook.office365.com/owa/calendar/76ae3992cab64758b280bd5926c43943@trivit.de/747570454df944a89a096c41b8218f8914228671257329283663/calendar.ics|https://dhbw.app/ical/FN-TIT24.ics
+kursname = FN-TIT24
+kurscheckbox = True
+
