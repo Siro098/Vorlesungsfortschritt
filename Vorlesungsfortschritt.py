@@ -1,6 +1,7 @@
+# Vorlesungsfortschritt.py
 # @Author: Simon Liebl & Adrian Döring
 # Git: Siro098 & adiiii789
-# Python Skript for Vorlesungsfortschritt 1.0
+# Python Skript for Vorlesungsfortschritt 1.3 (multi-ICS)
 
 from icalendar import Calendar
 from datetime import datetime, timedelta
@@ -8,160 +9,178 @@ import os
 import requests
 import sys
 
-# === KONFIGURATION ===
-#URL = "https://dhbw.app/ical/STG-TINF24IN"  # Download-Link für die iCal-Datei
-DEST_FOLDER = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py","ical")  # Speicherort für die iCal-Datei
-#ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1]) + ".ics")  # Pfad zur gespeicherten iCal-Datei
+DEST_FOLDER = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", "ical")
+OUTPUT_FILE  = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", r"txtfiles\Vorlesung.txt")
+OUTPUT_FILE1 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", r"txtfiles\Zahl.txt")
+OUTPUT_FILE2 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", r"txtfiles\Bar.txt")
 
-# Neuer Speicherort für Rainmeter (kein OneDrive!)
-OUTPUT_FILE = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Vorlesung.txt")
-OUTPUT_FILE1 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Zahl.txt")
-OUTPUT_FILE2 = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py",r"txtfiles\Bar.txt")
+def ensure_dirs():
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    os.makedirs(DEST_FOLDER, exist_ok=True)
 
-# Speicherort für Wallpaper Engine (relativer Pfad gönnt nicht)
-#WALLPAPER = True
-# OUTPUT_FILE3 = "C:/Program Files (x86)/Steam/steamapps/workshop/content/431960/1322008613/test/percentage.txt"
+def normalize_summary(val):
+    if isinstance(val, bytes):
+        try:
+            return val.decode("utf-8", errors="replace")
+        except Exception:
+            return str(val)
+    return str(val)
 
-
-def update_ics_file():
-    today = datetime.today().date()
-    updated_lines = []
-    found_datum = False
-    outdated = False
-
-    with open(config, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-
-    for line in lines:
-        if line.strip().startswith("datum="):
-            found_datum = True
-            try:
-                saved_date = datetime.strptime(line.strip().split("=", 1)[1], "%Y-%m-%d").date()
-                if saved_date < today:
-                    updated_lines.append(f"datum={today}\n")
-                    outdated = True
-                else:
-                    print("ICS-Datei wurde heute bereits aktualisiert.")
-                    return
-            except Exception:
-                updated_lines.append(f"datum={today}\n")
-                outdated = True
-        else:
-            updated_lines.append(line)
-
-    if not found_datum:
-        updated_lines.append(f"datum={today}\n")
-
-    print("Lade ICS-Datei herunter...")
+def read_config_lines(path):
     try:
-        response = requests.get(URL, stream=True, timeout=3)  # Timeout in Sekunden
-        if response.ok:
-            with open(ICS_FILE, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024 * 8):
-                    if chunk:
-                        f.write(chunk)
-                        f.flush()
-                        os.fsync(f.fileno())
-        else:
-            print(f"Fehler beim Download: {response.status_code}")
-            return
-    except requests.exceptions.Timeout:
-        print("Download abgebrochen: Zeitüberschreitung.")
-        return
+        with open(path, 'r', encoding='utf-8') as f:
+            return [ln.strip() for ln in f]
+    except FileNotFoundError:
+        return []
+    except Exception:
+        return []
+
+def get_value(lines, key):
+    for ln in lines:
+        if ln.lower().startswith(key.lower()+"="):
+            return ln.split("=", 1)[1].strip()
+    return ""
+
+def parse_ics_urls(value):
+    # akzeptiert Zeilenliste mit | Trennern oder neue Zeilen
+    if not value:
+        return []
+    parts = []
+    for chunk in value.replace("\r", "\n").replace("|", "\n").split("\n"):
+        u = chunk.strip()
+        if u:
+            parts.append(u)
+    return parts
+
+def download_ics(url, target_path, timeout=5):
+    try:
+        resp = requests.get(url, stream=True, timeout=timeout)
+        if not resp.ok:
+            print(f"HTTP {resp.status_code} bei {url}")
+            return False
+        with open(target_path, "wb") as f:
+            for chunk in resp.iter_content(8192):
+                if chunk:
+                    f.write(chunk)
+        return True
     except Exception as e:
-        print(f"Fehler beim Download: {e}")
-        return
-
-    # Datei zurückschreiben mit neuem Datum
-    with open(config, 'w', encoding='utf-8') as f:
-        f.writelines(updated_lines)
-
+        print(f"Download-Fehler {url}: {e}")
+        return False
 
 def write_to_file(vorlesung, percentage, timer_if_upcoming_subject):
-    """Schreibt die Vorlesungsdaten in eine Datei, die Rainmeter nutzen kann."""
-    progress_bar_length = 25  # Länge des Fortschrittsbalkens
+    progress_bar_length = 25
     filled_blocks = int(round(progress_bar_length * percentage / 100))
     progress_bar = "[" + "#" * filled_blocks + "-" * (progress_bar_length - filled_blocks) + "]"
     if timer_if_upcoming_subject != "":
-        # Zeit bis nächste Vorlesung
         progress_bar = timer_if_upcoming_subject
-
     try:
-        with open(OUTPUT_FILE, "w") as f:
-            f.write(f"{vorlesung}\n")  # Vorlesungsname
-        with open(OUTPUT_FILE1, "w") as f:
-            f.write(f"{percentage:.3f} %\n")  # Prozentwert
-        with open(OUTPUT_FILE2, "w") as f:
-            f.write(f"{progress_bar}\n")  # Fortschrittsbalke
-
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write(f"{vorlesung}\n")
+        with open(OUTPUT_FILE1, "w", encoding="utf-8") as f:
+            f.write(f"{percentage:.3f} %\n")
+        with open(OUTPUT_FILE2, "w", encoding="utf-8") as f:
+            f.write(f"{progress_bar}\n")
         if WALLPAPER:
-            with open(OUTPUT_FILE3, "w") as f:
+            with open(OUTPUT_FILE3, "w", encoding="utf-8") as f:
                 if vorlesung == "Keine Vorlesung aktiv":
-                    f.write(r"")
+                    f.write("")
                     return
                 if timer_if_upcoming_subject != "":
                     f.write(f"{vorlesung}\n{timer_if_upcoming_subject}\n")
                     return
-
                 f.write(f"{vorlesung}\n{progress_bar}\n{percentage:.3f}%\n")
-
     except Exception as e:
         print(f"Fehler beim Schreiben der Datei: {e}")
 
+def collect_events_from_files(files):
+    now = datetime.now().astimezone()
+    current_hit = None
+    next_today = None
 
-def main():
-    print("Starte Berechnung...")  # Debug-Ausgabe
+    for fp in files:
+        try:
+            with open(fp, "rb") as f:
+                cal = Calendar.from_ical(f.read())
+            for comp in cal.walk():
+                if comp.name != "VEVENT":
+                    continue
+                start = comp.decoded("dtstart")
+                end   = comp.decoded("dtend")
+                subj  = normalize_summary(comp.decoded("SUMMARY"))
+                if not isinstance(start, datetime) or not isinstance(end, datetime):
+                    continue
+                # laufend
+                if start <= now <= end:
+                    # nimm das mit der baldesten Endzeit
+                    if current_hit is None or end < current_hit["end"]:
+                        current_hit = {"subject": subj, "start": start, "end": end}
+                # heute noch kommend
+                elif now <= start and now.date() == start.date():
+                    if next_today is None or start < next_today["start"]:
+                        next_today = {"subject": subj, "start": start, "end": end}
+        except Exception as e:
+            print(f"Fehler beim Verarbeiten von {fp}: {e}")
 
-    """Berechnet den aktuellen Fortschritt der laufenden Vorlesung."""
-    now = datetime.now().astimezone()  # - timedelta(hours=12, minutes=15) # Konvertiert 'now' in ein offset-aware datetime
+    return current_hit, next_today
+
+def main_multi(urls):
+    ensure_dirs()
+    # täglicher Downloadschutz über ein einziges Datumseintrag
+    today = datetime.today().date()
+    lines = read_config_lines(config)
+    saved = get_value(lines, "datum")
+    needs_download = True
     try:
-        with open(ICS_FILE, 'rb') as f:
-            ecal = Calendar.from_ical(f.read())
+        if saved:
+            saved_date = datetime.strptime(saved, "%Y-%m-%d").date()
+            needs_download = saved_date < today
+    except Exception:
+        needs_download = True
 
-        for component in ecal.walk():
-            if component.name == "VEVENT":
-                start = component.decoded("dtstart")
-                end = component.decoded("dtend")
-                subject = component.decoded("SUMMARY").decode("utf-8") if isinstance(component.decoded("SUMMARY"),
-                                                                                     bytes) else str(
-                    component.decoded("SUMMARY"))
-                if isinstance(start, datetime) and isinstance(end, datetime):
-                    if start <= now <= end:
-                        total_duration = (end - start).total_seconds()
-                        elapsed_time = (now - start).total_seconds()
-                        percentage = (elapsed_time / total_duration) * 100
-                        write_to_file(subject, percentage, "")
-                        return  # Vorlesung gefunden, kein weiteres Durchsuchen nötig
+    files = []
+    for url in urls:
+        name = url.split("/")[-1] or "kalender.ics"
+        if not name.lower().endswith(".ics"):
+            name += ".ics"
+        path = os.path.join(DEST_FOLDER, name)
+        files.append(path)
+        if needs_download:
+            ok = download_ics(url, path)
+            if not ok:
+                print(f"Warnung: {url} konnte nicht geladen werden.")
 
-                    elif now <= start and now.date() == start.date():  # Nächste Vorlesung an selben Tag
-                        # print(now.date())
-                        # print(start.date())
-                        time_to_subject = (start - now).total_seconds()
-                        hours = str(int(time_to_subject // 3600)).zfill(2)
-                        minutes = str(int((time_to_subject % 3600) // 60)).zfill(2)
-                        seconds = str(int(time_to_subject % 60)).zfill(2)
+    if needs_download:
+        # datum aktualisieren
+        rest = [ln for ln in lines if not ln.startswith("datum=")]
+        rest.append(f"datum={today}")
+        try:
+            with open(config, "w", encoding="utf-8") as f:
+                f.write("\n".join(rest) + "\n")
+        except Exception as e:
+            print(f"Konnte Datum nicht schreiben: {e}")
 
-                        timer_if_upcoming_subject = f"{hours}:{minutes}:{seconds}"
-                        # print(timer_if_upcoming_subject)
-                        write_to_file(subject, 0, timer_if_upcoming_subject)
-                        return  # Erste Vorlesung, welche nach der aktuellen Zeit stattfindet
+    current_hit, next_today = collect_events_from_files(files)
+    if current_hit:
+        total = (current_hit["end"] - current_hit["start"]).total_seconds()
+        elapsed = (datetime.now().astimezone() - current_hit["start"]).total_seconds()
+        pct = max(0.0, min(100.0, (elapsed / total) * 100.0))
+        write_to_file(current_hit["subject"], pct, "")
+        return
+    if next_today:
+        delta = (next_today["start"] - datetime.now().astimezone()).total_seconds()
+        hours = str(int(delta // 3600)).zfill(2)
+        minutes = str(int((delta % 3600) // 60)).zfill(2)
+        seconds = str(int(delta % 60)).zfill(2)
+        write_to_file(next_today["subject"], 0, f"{hours}:{minutes}:{seconds}")
+        return
+    write_to_file("Keine Vorlesung aktiv", 0, "")
 
-        # Falls keine Vorlesung läuft, leere Datei schreiben
-        write_to_file("Keine Vorlesung aktiv", 0, "")
-
-    except Exception as e:
-        print(f"Fehler beim Verarbeiten der iCal-Datei: {e}")
-        write_to_file("Fehler", 0, "")
-
-zeile = ""
 def fetchSetupFile(typ):
-
     array = []
     try:
         with open(config, 'r', encoding='utf-8') as datei:
             for zeile in datei:
                 array.append(zeile.strip())
-
     except FileNotFoundError:
         print("Config nicht gefunden")
     except Exception as e:
@@ -169,47 +188,36 @@ def fetchSetupFile(typ):
 
     for i in range(len(array)):
         if typ in array[i]:
-            if "kurs" in typ:
-                return array[i].split("=")[-1].strip()
-            elif "wallpaper_aktiv" in typ:
-                pass
-            elif "pfad_falls_nicht_in_dokumente" in typ:
-                pass
-            elif "wallpaper_datei_pfad" in typ:
-                pass
-
-
+            return array[i].split("=", 1)[-1].strip()
     return None
-
 
 if __name__ == "__main__":
     config = os.path.abspath(__file__).replace("Vorlesungsfortschritt.py", "config.txt")
-    if open(config, 'r', encoding='utf-8').read() != "":
-        URL = "https://dhbw.app/ical/" + fetchSetupFile("kurs") + ".ics"
-        ICS_FILE = os.path.join(DEST_FOLDER, str(URL.split("/")[-1]))  # Pfad zur gespeicherten iCal-Datei
+    content = open(config, 'r', encoding='utf-8').read() if os.path.exists(config) else ""
+    if content != "":
+        WALLPAPER = "Wallpaper An" in content
+        if WALLPAPER:
+            array = read_config_lines(config)
+            wp_path = get_value(array, "wallpaper_datei_pfad")
+            if wp_path:
+                OUTPUT_FILE3 = wp_path
 
-        if "Wallpaper An" in open(config, 'r', encoding='utf-8').read():
-            WALLPAPER = True
-            array = []
-            try:
-                with open(config, 'r', encoding='utf-8') as datei:
-                    for zeile in datei:
-                        array.append(zeile.strip())
+        # neue Mehrfach-URLs
+        urls_val = fetchSetupFile("ICS_URLS")
+        urls = parse_ics_urls(urls_val) if urls_val else []
 
-            except FileNotFoundError:
-                print("Config nicht gefunden")
-            except Exception as e:
-                print(f"Ein Fehler ist aufgetreten: {e}")
-
-            for i in range(len(array)):
-                if "wallpaper_datei_pfad" in array[i]:
-                    OUTPUT_FILE3 =  array[i].split("=")[-1].strip()
-                    #print(OUTPUT_FILE3)
+        if urls:
+            main_multi(urls)
         else:
-            WALLPAPER = False
-
-        update_ics_file()
-        main()
+            # Fallback auf alten Kurs
+            kurs = fetchSetupFile("Kurs")
+            if not kurs:
+                write_to_file("Keine Vorlesung aktiv", 0, "")
+                sys.exit(0)
+            url = "https://dhbw.app/ical/" + kurs + ".ics"
+            ensure_dirs()
+            ics_file = os.path.join(DEST_FOLDER, url.split("/")[-1])
+            # einmal täglich laden
+            main_multi([url])  # nutzt denselben Weg, aber nur mit einem Link
     else:
         print("Setup nicht ausgeführt (-> config leer)")
-
