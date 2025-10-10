@@ -41,6 +41,7 @@ Getestet unter Python 3.8, 3.12, 3.13 (VM Win11)
 
 ## Its not a Bug its a feature(Known Problems)
 -Sollten zwei Termine zum selben Zeitpunkt stattfinden wechselt das Skript regelmäßig zwischen denn beiden Terminen(interresanterweiße ziemlich rhytmisch)
+
 -Der Fortschrittsbalken kann Artefakte bilden bei manchen Schriftgrößen, ebenfalls wird er immer länger(in Untersuchung)
 
 
@@ -75,5 +76,6 @@ If the config file already contains entries, the setup will ask whether you want
 Tested with Python 3.8, 3.12, 3.13 (Windows 11 VM).
 
 ## It’s not a bug, it’s a feature (Known Issues)
-If two events occur at the same time, the script will switch between them regularly (interestingly, in a rather rhythmic way).
-The progress bar may show artifacts at certain font sizes, and it tends to get longer over time (currently under investigation).
+-If two events occur at the same time, the script will switch between them regularly (interestingly, in a rather rhythmic way).
+
+-The progress bar may show artifacts at certain font sizes, and it tends to get longer over time (currently under investigation).
