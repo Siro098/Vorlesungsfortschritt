@@ -48,7 +48,7 @@ Getestet unter Python 3.8, 3.12, 3.13 (VM Win11)
 -Der Fortschrittsbalken kann Artefakte bilden bei manchen Schriftgrößen, ebenfalls wird er immer länger(in Untersuchung)
 
 
-Description
+# Description
 
 Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)
 
