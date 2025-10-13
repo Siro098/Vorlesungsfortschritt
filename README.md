@@ -10,7 +10,7 @@ https://buymeacoffee.com/vorlesungsfortschritt
 <img width="1424" height="205" alt="grafik" src="https://github.com/user-attachments/assets/14c332a3-485b-4d84-8e1c-2c001adb11a2" />
 
 
-# Description
+# Beschreibung
 `Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)`
 
 Ein Skript zum Anzeigen des aktuellen Fortschrittes in einer DHBW Vorlesung oder eines Kalendertermins in Prozent.
@@ -34,7 +34,7 @@ Um das Programm richtig einzurichten, wird zunächst `Python 3.XX` und `Rainmete
 6. In der .ini Datei können Die Schriftgröße und Farbe ect. verändert werden (DeinMeter1-3)
 7. Viel Spaß
 
-## Troubleshoot
+## Problemlösung
 
 Wenn das `Setup` das Rainmeter Verzeichnis nicht in `Dokumente` vorfindet, kommt in Setup ein Button, bei welchem man den `Rainmeter` Ordner auswählen soll. 
 
