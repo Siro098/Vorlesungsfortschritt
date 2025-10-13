@@ -7,6 +7,9 @@ https://buymeacoffee.com/vorlesungsfortschritt
 2.
 3.
 
+<img width="1424" height="205" alt="grafik" src="https://github.com/user-attachments/assets/14c332a3-485b-4d84-8e1c-2c001adb11a2" />
+
+
 # Description
 `Created by Simon Liebl (Siro098) & Adrian Döring (adiiii789)`
 
