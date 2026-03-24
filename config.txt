@@ -3,3 +3,6 @@ urls = https://outlook.office365.com/owa/calendar/76ae3992cab64758b280bd5926c439
 kursname = FN-TIT24
 kurscheckbox = True
 
+monatslohn=2000.00
+
+datum=2026-03-24
